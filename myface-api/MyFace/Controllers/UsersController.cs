@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using MyFace.Helpers;
 using MyFace.Models.Request;
 using MyFace.Models.Response;
 using MyFace.Repositories;
+
 
 namespace MyFace.Controllers
 {
@@ -19,9 +22,16 @@ namespace MyFace.Controllers
         [HttpGet("")]
         public ActionResult<UserListResponse> Search([FromQuery] UserSearchRequest searchRequest)
         {
+            string[] authContent = UserPasswordHelper.ReadAuthorizationHeader(Request.Headers["Authorization"]);
+            var user = _users.GetByUserName(authContent[0]);
+            string salt = user.Salt;
+            string actual_hashed_password = user.Hashed_Password;
+            if(!UserPasswordHelper.ValidLogin(authContent[1],salt,actual_hashed_password)) {  
+                return BadRequest("Invalid login credentials");
+            }          
             var users = _users.Search(searchRequest);
             var userCount = _users.Count(searchRequest);
-            return UserListResponse.Create(searchRequest, users, userCount);
+            return UserListResponse.Create(searchRequest, users, userCount);          
         }
 
         [HttpGet("{id}")]

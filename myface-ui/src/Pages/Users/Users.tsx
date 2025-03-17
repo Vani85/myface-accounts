@@ -11,8 +11,8 @@ export function Users(): JSX.Element {
     const [searchTerm, setSearchTerm] = useState("");
     const loginContext = useContext(LoginContext);
 
-    function getUsers(page: number, pageSize: number) {
-        return fetchUsers(loginContext.UserName,loginContext.Password,searchTerm, page, pageSize);
+    function getUsers(username:string, password:string, page: number, pageSize: number) {
+        return fetchUsers(username,password,searchTerm, page, pageSize);
     }
     
     return (

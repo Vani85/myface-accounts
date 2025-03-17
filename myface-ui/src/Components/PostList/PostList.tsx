@@ -1,7 +1,8 @@
-﻿import React, {useEffect, useState} from 'react';
+﻿import React, {useContext, useEffect, useState} from 'react';
 import {ListResponse, Post} from "../../Api/apiClient";
 import {Grid} from "../Grid/Grid";
 import {PostCard} from "../PostCard/PostCard";
+import { LoginContext } from '../LoginManager/LoginManager';
 
 interface PostListProps {
     title: string,
@@ -10,6 +11,7 @@ interface PostListProps {
 
 export function PostList(props: PostListProps): JSX.Element {
     const [posts, setPosts] = useState<Post[]>([]);
+    const loginContext = useContext(LoginContext);
     
     useEffect(() => {
         props.fetchPosts()

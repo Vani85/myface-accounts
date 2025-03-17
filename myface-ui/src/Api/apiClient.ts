@@ -41,48 +41,49 @@ export interface NewPost {
     userId: number;
 }
 
-export function appendHeader(username:string, password:string) {     
-    let headers = new Headers();
-    headers.append('Authorization', 'Basic' + base64.encode(username + ":" + password));
-    return headers;
-}
-
-export async function fetchUsers(username:string, password:string,searchTerm: string, page: number, pageSize: number): Promise<ListResponse<User>> {
-    
-    const response = await fetch(`https://localhost:5001/users?search=${searchTerm}&page=${page}&pageSize=${pageSize}`,
-        {method:'GET',headers: appendHeader(username,password) });
+export async function fetchAPI(url:string,username:string,password:string) {
+    const credentials = btoa(`${username}:${password}`);
+    const response = await fetch(`https://localhost:5001/${url}`,
+        {
+            method: 'GET', 
+            headers: {
+              "Authorization": `Basic ${credentials}`,
+              "Content-Type": 'application/json',
+              "Access-Control-Allow-Origin": "*"
+            }
+        });
     return await response.json();
 }
-
-export async function fetchUser(userId: string | number): Promise<User> {
-    const response = await fetch(`https://localhost:5001/users/${userId}`);
-    return await response.json();
+export async function fetchUsers(username:string, password:string,searchTerm: string, page: number, pageSize: number): Promise<ListResponse<User>> {   
+    return await fetchAPI(`users?search=${searchTerm}&page=${page}&pageSize=${pageSize}`,username,password);
 }
 
-export async function fetchPosts(page: number, pageSize: number): Promise<ListResponse<Post>> {
-    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}`);
-    return await response.json();
+export async function fetchUser(username:string, password:string,userId: string | number): Promise<User> {
+    return await fetchAPI(`users/${userId}`,username,password);
 }
 
-export async function fetchPostsForUser(page: number, pageSize: number, userId: string | number) {
-    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&postedBy=${userId}`);
-    return await response.json();
+export async function fetchPosts(username:string, password:string,page: number, pageSize: number): Promise<ListResponse<Post>> {
+    return await fetchAPI(`feed?page=${page}&pageSize=${pageSize}`,username,password);
 }
 
-export async function fetchPostsLikedBy(page: number, pageSize: number, userId: string | number) {
-    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&likedBy=${userId}`);
-    return await response.json();
+export async function fetchPostsForUser(username:string, password:string,page: number, pageSize: number, userId: string | number) {
+    return await fetchAPI(`feed?page=${page}&pageSize=${pageSize}&postedBy=${userId}`,username,password);
 }
 
-export async function fetchPostsDislikedBy(page: number, pageSize: number, userId: string | number) {
-    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&dislikedBy=${userId}`);
-    return await response.json();
+export async function fetchPostsLikedBy(username:string, password:string,page: number, pageSize: number, userId: string | number) {
+    return await fetchAPI(`feed?page=${page}&pageSize=${pageSize}&likedBy=${userId}`,username,password);
 }
 
-export async function createPost(newPost: NewPost) {
+export async function fetchPostsDislikedBy(username:string, password:string,page: number, pageSize: number, userId: string | number) {
+    return await fetchAPI(`feed?page=${page}&pageSize=${pageSize}&dislikedBy=${userId}`,username,password);
+}
+
+export async function createPost(username:string, password:string,newPost: NewPost) {
+    const credentials = btoa(`${username}:${password}`);
     const response = await fetch(`https://localhost:5001/posts/create`, {
         method: "POST",
         headers: {
+            "Authorization": `Basic ${credentials}`,
             "Content-Type": "application/json"
         },
         body: JSON.stringify(newPost),

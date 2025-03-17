@@ -7,7 +7,7 @@ using MyFace.Repositories;
 namespace MyFace.Controllers
 {
     [ApiController]
-    [Route("feeds")]
+    [Route("feed")]
     public class FeedController : ControllerBase
     {
         private readonly IPostsRepo _posts;

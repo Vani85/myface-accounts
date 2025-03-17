@@ -1,4 +1,5 @@
-﻿export interface ListResponse<T> {
+﻿let base64 = require('base-64');
+export interface ListResponse<T> {
     items: T[];
     totalNumberOfItems: number;
     page: number;
@@ -40,8 +41,16 @@ export interface NewPost {
     userId: number;
 }
 
-export async function fetchUsers(searchTerm: string, page: number, pageSize: number): Promise<ListResponse<User>> {
-    const response = await fetch(`https://localhost:5001/users?search=${searchTerm}&page=${page}&pageSize=${pageSize}`);
+export function appendHeader(username:string, password:string) {     
+    let headers = new Headers();
+    headers.append('Authorization', 'Basic' + base64.encode(username + ":" + password));
+    return headers;
+}
+
+export async function fetchUsers(username:string, password:string,searchTerm: string, page: number, pageSize: number): Promise<ListResponse<User>> {
+    
+    const response = await fetch(`https://localhost:5001/users?search=${searchTerm}&page=${page}&pageSize=${pageSize}`,
+        {method:'GET',headers: appendHeader(username,password) });
     return await response.json();
 }
 

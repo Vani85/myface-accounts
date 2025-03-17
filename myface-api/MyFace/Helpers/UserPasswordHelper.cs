@@ -2,10 +2,11 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.AspNetCore.Mvc;
+using MyFace.Repositories;
 
 namespace MyFace.Helpers;
 public class UserPasswordHelper {
-
     public static byte[] GenerateSalt() {
         byte[] salt = new byte[128 / 8];
         using (var rngCsp = new RNGCryptoServiceProvider())
@@ -24,18 +25,24 @@ public class UserPasswordHelper {
         return hashed;
     }
 
-    public static string[] ReadAuthorizationHeader(string authHeader) {
+    public static bool ReadAuthorizationHeaderAndValidateLogin(string authHeader, IUsersRepo users) {
         if (authHeader != null && authHeader.StartsWith("Basic")) {
             string encodedUsernamePassword = authHeader.Substring("Basic ".Length).Trim();
             Encoding encoding = Encoding.GetEncoding("iso-8859-1");
             string usernamePassword = encoding.GetString(Convert.FromBase64String(encodedUsernamePassword));
 
             int seperatorIndex = usernamePassword.IndexOf(':');
-
             var username = usernamePassword.Substring(0, seperatorIndex);
             var password = usernamePassword.Substring(seperatorIndex + 1);
-            return new string[]{username,password};
-            
+           
+            var user = users.GetByUserName(username);
+            string salt = user.Salt;
+            string actual_hashed_password = user.Hashed_Password;
+            if(!UserPasswordHelper.ValidLogin(password,salt,actual_hashed_password)) {  
+                return false;
+            }     
+            return true;  
+
         } else {
             throw new Exception("The authorization header is either empty or isn't Basic.");
         }

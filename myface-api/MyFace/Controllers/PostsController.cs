@@ -2,6 +2,7 @@
 using MyFace.Models.Request;
 using MyFace.Models.Response;
 using MyFace.Repositories;
+using MyFace.Helpers;
 
 namespace MyFace.Controllers
 {
@@ -11,14 +12,20 @@ namespace MyFace.Controllers
     {    
         private readonly IPostsRepo _posts;
 
-        public PostsController(IPostsRepo posts)
+        private readonly IUsersRepo _users;
+        public PostsController(IPostsRepo posts, IUsersRepo users)
         {
             _posts = posts;
+            _users = users;
         }
         
         [HttpGet("")]
         public ActionResult<PostListResponse> Search([FromQuery] PostSearchRequest searchRequest)
         {
+            
+            if (!UserPasswordHelper.ReadAuthorizationHeaderAndValidateLogin(Request.Headers["Authorization"], _users))
+                return BadRequest("Invalid login.");
+
             var posts = _posts.Search(searchRequest);
             var postCount = _posts.Count(searchRequest);
             return PostListResponse.Create(searchRequest, posts, postCount);
@@ -27,6 +34,9 @@ namespace MyFace.Controllers
         [HttpGet("{id}")]
         public ActionResult<PostResponse> GetById([FromRoute] int id)
         {
+            if (!UserPasswordHelper.ReadAuthorizationHeaderAndValidateLogin(Request.Headers["Authorization"], _users))
+                return BadRequest("Invalid login.");
+                
             var post = _posts.GetById(id);
             return new PostResponse(post);
         }
@@ -39,6 +49,9 @@ namespace MyFace.Controllers
                 return BadRequest(ModelState);
             }
             
+            if (!UserPasswordHelper.ReadAuthorizationHeaderAndValidateLogin(Request.Headers["Authorization"], _users))
+                return BadRequest("Invalid login.");
+
             var post = _posts.Create(newPost);
 
             var url = Url.Action("GetById", new { id = post.Id });
@@ -54,6 +67,9 @@ namespace MyFace.Controllers
                 return BadRequest(ModelState);
             }
 
+            if (!UserPasswordHelper.ReadAuthorizationHeaderAndValidateLogin(Request.Headers["Authorization"], _users))
+                return BadRequest("Invalid login.");
+
             var post = _posts.Update(id, update);
             return new PostResponse(post);
         }
@@ -61,6 +77,9 @@ namespace MyFace.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete([FromRoute] int id)
         {
+            if (!UserPasswordHelper.ReadAuthorizationHeaderAndValidateLogin(Request.Headers["Authorization"], _users))
+                return BadRequest("Invalid login.");
+
             _posts.Delete(id);
             return Ok();
         }

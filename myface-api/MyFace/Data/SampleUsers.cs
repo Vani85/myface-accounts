@@ -1,13 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Diagnostics;
+using MyFace.Helpers;
 using MyFace.Models.Database;
 
 namespace MyFace.Data
 {
+    
     public static class SampleUsers
     {
         public const int NumberOfUsers = 100;
-
         private static readonly IList<IList<string>> Data = new List<IList<string>>
         {
             new List<string> { "Kania", "Placido", "kplacido0", "kplacido0@qq.com" },
@@ -119,6 +122,7 @@ namespace MyFace.Data
 
         private static User CreateRandomUser(int index)
         {
+            string salt = Convert.ToBase64String(UserPasswordHelper.GenerateSalt());
             return new User
             {
                 FirstName = Data[index][0],
@@ -127,6 +131,8 @@ namespace MyFace.Data
                 Email = Data[index][3],
                 ProfileImageUrl = ImageGenerator.GetProfileImage(Data[index][2]),
                 CoverImageUrl = ImageGenerator.GetCoverImage(index),
+                Salt = salt,               
+                Hashed_Password = UserPasswordHelper.GenerateHashedPassword(salt,"Password" + index)
             };
         }
     }

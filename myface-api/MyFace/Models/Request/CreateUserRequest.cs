@@ -17,6 +17,10 @@ namespace MyFace.Models.Request
         public string Email { get; set; }
         
         [Required]
+        [StringLength(15)]
+        public string Password { get; set; }
+
+        [Required]
         [StringLength(70)]
         public string Username { get; set; }
         

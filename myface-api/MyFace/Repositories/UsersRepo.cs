@@ -9,6 +9,7 @@ namespace MyFace.Repositories
 {
     public interface IUsersRepo
     {
+        User Authenticate(string username, string password);
         IEnumerable<User> Search(UserSearchRequest search);
         int Count(UserSearchRequest search);
         User GetById(int id);
@@ -27,6 +28,18 @@ namespace MyFace.Repositories
             _context = context;
         }
         
+        public User Authenticate(string username, string password)
+        {
+            var user = GetByUserName(username);
+            string salt = user.Salt;
+            string entered_hashed_password = UserPasswordHelper.GenerateHashedPassword(salt,password);
+
+            if(entered_hashed_password == user.Hashed_Password) {
+                return user;
+            } 
+            return null;         
+        }
+
         public IEnumerable<User> Search(UserSearchRequest search)
         {
             return _context.Users

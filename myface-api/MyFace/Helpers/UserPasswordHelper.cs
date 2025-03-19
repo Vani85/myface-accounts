@@ -35,6 +35,7 @@ public class UserPasswordHelper {
             var username = usernamePassword.Substring(0, seperatorIndex);
             var password = usernamePassword.Substring(seperatorIndex + 1);
            
+            Console.WriteLine("USername : " + username);
             var user = users.GetByUserName(username);
             string salt = user.Salt;
             string actual_hashed_password = user.Hashed_Password;

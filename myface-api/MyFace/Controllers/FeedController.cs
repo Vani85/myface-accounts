@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MyFace.Helpers;
 using MyFace.Models.Request;
 using MyFace.Models.Response;
@@ -6,6 +7,7 @@ using MyFace.Repositories;
 
 namespace MyFace.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("feed")]
     public class FeedController : ControllerBase
@@ -22,8 +24,6 @@ namespace MyFace.Controllers
         [HttpGet("")]
         public ActionResult<FeedModel> GetFeed([FromQuery] FeedSearchRequest searchRequest)
         {
-            if (!UserPasswordHelper.ReadAuthorizationHeaderAndValidateLogin(Request.Headers["Authorization"], _users))
-                return BadRequest("Invalid login.");
             var posts = _posts.SearchFeed(searchRequest);
             var postCount = _posts.Count(searchRequest);
             return FeedModel.Create(searchRequest, posts, postCount);

@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyFace.Helpers;
 using MyFace.Repositories;
 
 namespace MyFace.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("")]
     public class HomeController : ControllerBase
@@ -18,9 +20,7 @@ namespace MyFace.Controllers
         
         [HttpGet("")]
         public ActionResult<Dictionary<string, string>> Endpoints()
-        {
-            if (!UserPasswordHelper.ReadAuthorizationHeaderAndValidateLogin(Request.Headers["Authorization"], _users))
-                return BadRequest("Invalid login.");
+        {           
             return new Dictionary<string, string>
             {
                 {"/users", "for information on users."},
